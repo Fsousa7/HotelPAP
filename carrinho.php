@@ -88,9 +88,14 @@ $reservas = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
         }
         .table tbody tr {
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .table tbody tr:hover {
             background-color: #f1f1f1;
+        }
+        .table tbody .expanded {
+            background-color: #e9ecef;
+            transition: all 0.3s ease;
         }
         .btn {
             background-color: #333;
@@ -148,12 +153,22 @@ $reservas = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
                         </thead>
                         <tbody>
                             <?php foreach ($reservas as $reserva): ?>
-                                <tr>
+                                <tr class="clickable-row" data-id="<?php echo htmlspecialchars($reserva['id_reserva']); ?>">
                                     <td><?php echo htmlspecialchars($reserva['id_reserva']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['tipo_quarto']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['data_checkin']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['data_checkout']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['valor_total']); ?></td>
+                                </tr>
+                                <tr class="expandable-row" id="details-<?php echo htmlspecialchars($reserva['id_reserva']); ?>" style="display: none;">
+                                    <td colspan="5">
+                                        <!-- Aqui você pode adicionar mais detalhes da reserva -->
+                                        <p>Detalhes da reserva para o quarto <?php echo htmlspecialchars($reserva['tipo_quarto']); ?>:</p>
+                                        <p>Data de Check-in: <?php echo htmlspecialchars($reserva['data_checkin']); ?></p>
+                                        <p>Data de Check-out: <?php echo htmlspecialchars($reserva['data_checkout']); ?></p>
+                                        <p>Valor Total: €<?php echo htmlspecialchars($reserva['valor_total']); ?></p>
+                                        <!-- Adicione mais informações conforme necessário -->
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -166,5 +181,16 @@ $reservas = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
         </div>
         
     </div>
+    <!-- JavaScript para manipular a expansão das linhas da tabela -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.clickable-row').on('click', function() {
+                var id = $(this).data('id');
+                $('#details-' + id).toggle();
+                $(this).toggleClass('expanded');
+            });
+        });
+    </script>
 </body>
 </html>

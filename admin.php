@@ -102,19 +102,69 @@ endif;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #ffc107 !important;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        h3 {
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #343a40;
+        }
+        table {
+            transition: transform 0.3s ease;
+        }
+        table:hover {
+            transform: scale(1.02);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Hotel Admin</a>
-            <div class="collapse navbar-collapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="?page=utilizadores">Utilizadores</a></li>
                     <li class="nav-item"><a class="nav-link" href="?page=quartos">Quartos</a></li>
                     <li class="nav-item"><a class="nav-link" href="?page=reservas">Reservas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="?page=pagamentos">Pagamentos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="?page=contactos">Contactos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="?page=admins">Admins</a></li> <!-- Novo item de menu -->
+                    <li class="nav-item"><a class="nav-link" href="?page=admins">Admins</a></li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="?logout">Logout</a></li>
@@ -122,44 +172,31 @@ endif;
             </div>
         </div>
     </nav>
-    <div class="container mt-5">
+    <div class="container">
         <?php
         $page = $_GET['page'] ?? 'dashboard';
 
         // Renderização das Tabelas
         if ($page == 'utilizadores') {
             $stmt = $pdo->query("SELECT * FROM utilizadores");
-            echo "<h3>Utilizadores</h3><table class='table table-striped'><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th></tr>";
+            echo "<h3>Utilizadores</h3><table class='table table-striped table-hover'><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th></tr>";
             foreach ($stmt as $row) {
                 echo "<tr><td>{$row['id_utilizador']}</td><td>{$row['nome']}</td><td>{$row['email']}</td><td>{$row['telefone']}</td></tr>";
             }
             echo "</table>";
         } elseif ($page == 'quartos') {
             $stmt = $pdo->query("SELECT * FROM quartos");
-            echo "<h3>Quartos</h3><table class='table table-striped'><tr><th>ID</th><th>Número</th><th>Tipo</th><th>Descrição</th><th>Preço</th></tr>";
+            echo "<h3>Quartos</h3><table class='table table-striped table-hover'><tr><th>ID</th><th>Número</th><th>Tipo</th><th>Descrição</th><th>Preço</th></tr>";
             foreach ($stmt as $row) {
                 echo "<tr><td>{$row['id_quarto']}</td><td>{$row['numero_quarto']}</td><td>{$row['tipo_quarto']}</td><td>{$row['descricao']}</td><td>{$row['preco_diaria']}</td></tr>";
             }
             echo "</table>";
+            echo "<a href='add_quarto.php' class='btn btn-success mt-3'>Adicionar Quarto</a>"; // Botão para redirecionar para add_quarto.php
         } elseif ($page == 'reservas') {
             $stmt = $pdo->query("SELECT * FROM reservas");
-            echo "<h3>Reservas</h3><table class='table table-striped'><tr><th>ID</th><th>ID Utilizador</th><th>ID Quarto</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Valor Total</th></tr>";
+            echo "<h3>Reservas</h3><table class='table table-striped table-hover'><tr><th>ID</th><th>ID Utilizador</th><th>ID Quarto</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Valor Total</th></tr>";
             foreach ($stmt as $row) {
                 echo "<tr><td>{$row['id_reserva']}</td><td>{$row['id_utilizador']}</td><td>{$row['id_quarto']}</td><td>{$row['data_checkin']}</td><td>{$row['data_checkout']}</td><td>{$row['status_reserva']}</td><td>{$row['valor_total']}</td></tr>";
-            }
-            echo "</table>";
-        } elseif ($page == 'pagamentos') {
-            $stmt = $pdo->query("SELECT * FROM pagamentos");
-            echo "<h3>Pagamentos</h3><table class='table table-striped'><tr><th>ID</th><th>ID Reserva</th><th>Método</th><th>Data</th><th>Valor</th><th>Status</th></tr>";
-            foreach ($stmt as $row) {
-                echo "<tr><td>{$row['id_pagamento']}</td><td>{$row['id_reserva']}</td><td>{$row['metodo_pagamento']}</td><td>{$row['data_pagamento']}</td><td>{$row['valor_pago']}</td><td>{$row['status_pagamento']}</td></tr>";
-            }
-            echo "</table>";
-        } elseif ($page == 'contactos') {
-            $stmt = $pdo->query("SELECT * FROM contactos");
-            echo "<h3>Contactos</h3><table class='table table-striped'><tr><th>ID</th><th>Nome</th><th>Email</th><th>Mensagem</th><th>Data</th></tr>";
-            foreach ($stmt as $row) {
-                echo "<tr><td>{$row['id']}</td><td>{$row['nome']}</td><td>{$row['email']}</td><td>{$row['mensagem']}</td><td>{$row['data_envio']}</td></tr>";
             }
             echo "</table>";
         } elseif ($page == 'admins') {
@@ -207,7 +244,7 @@ endif;
             </form>
 
             <h4 class="mt-5">Lista de Administradores</h4>
-            <table class="table table-striped">
+            <table class="table table-striped table-hover">
                 <tr><th>ID</th><th>Email</th></tr>
                 <?php foreach ($stmt as $admin): ?>
                     <tr><td><?= $admin['id'] ?></td><td><?= $admin['email'] ?></td></tr>
@@ -217,5 +254,7 @@ endif;
         }
         ?>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

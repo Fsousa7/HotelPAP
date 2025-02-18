@@ -229,7 +229,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <li class="nav-item"><a class="nav-link active" href="#hero">Início</a></li>
                     <li class="nav-item"><a class="nav-link" href="#quartos">Quartos</a></li>
                     <li class="nav-item"><a class="nav-link" href="#servicos">Serviços</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#sobre">Sobre</a></li>
+                    
                     <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
                 </ul>
 

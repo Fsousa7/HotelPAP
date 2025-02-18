@@ -144,13 +144,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form method="post" action="" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="id_quarto">Quarto</label>
-                <select class="form-control" id="id_quarto" name="id_quarto" required>
+                <select class="form-control" id="id_quarto" name="id_quarto" required onchange="calculateTotal()">
                     <?php if (empty($quartos)): ?>
                         <option value="">Não há quartos disponíveis</option>
                     <?php else: ?>
                         <?php foreach ($quartos as $quarto): ?>
-                            <option value="<?php echo $quarto['id_quarto']; ?>">
-                                <?php echo $quarto['tipo_quarto']; ?> - €<?php echo $quarto['preco_diaria']; ?>/noite
+                            <option value="<?php echo $quarto['id_quarto']; ?>" data-preco="<?php echo $quarto['preco_diaria']; ?>">
+                                <?php echo $quarto['numero_quarto']; ?> - <?php echo $quarto['tipo_quarto']; ?> - €<?php echo $quarto['preco_diaria']; ?>/noite
                             </option>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -158,20 +158,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <div class="form-group">
                 <label for="data_checkin">Data Check-in</label>
-                <input type="date" class="form-control" id="data_checkin" name="data_checkin" required>
+                <input type="date" class="form-control" id="data_checkin" name="data_checkin" required onchange="calculateTotal()">
             </div>
             <div class="form-group">
                 <label for="data_checkout">Data Check-out</label>
-                <input type="date" class="form-control" id="data_checkout" name="data_checkout" required>
+                <input type="date" class="form-control" id="data_checkout" name="data_checkout" required onchange="calculateTotal()">
             </div>
             <div class="form-group">
                 <label for="valor_total">Valor Total (€)</label>
-                <input type="number" class="form-control" id="valor_total" name="valor_total" required>
+                <input type="number" class="form-control" id="valor_total" name="valor_total" required readonly>
             </div>
             <button type="submit" class="btn btn-primary w-100">Reservar</button>
         </form>
     </div>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('data_checkin').setAttribute('min', today);
+            document.getElementById('data_checkout').setAttribute('min', today);
+        });
+
+        function calculateTotal() {
+            const id_quarto = document.getElementById('id_quarto');
+            const data_checkin = document.getElementById('data_checkin').value;
+            const data_checkout = document.getElementById('data_checkout').value;
+            const valor_total = document.getElementById('valor_total');
+
+            if (id_quarto.value && data_checkin && data_checkout) {
+                const preco_diaria = id_quarto.options[id_quarto.selectedIndex].getAttribute('data-preco');
+                const checkin = new Date(data_checkin);
+                const checkout = new Date(data_checkout);
+                const diffTime = Math.abs(checkout - checkin);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 0) {
+                    valor_total.value = diffDays * preco_diaria;
+                } else {
+                    valor_total.value = preco_diaria; // Consider 1 night if check-in and check-out are the same day
+                }
+            }
+        }
+
         function validateForm() {
             const id_quarto = document.getElementById('id_quarto').value;
             const data_checkin = document.getElementById('data_checkin').value;
