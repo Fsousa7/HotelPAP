@@ -352,43 +352,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </section>
 
-    <!-- Seção de Contactos -->
-    <section id="contacto" class="py-5 dark-background">
-        <div class="container">
-            <h2 class="text-center mb-5">Contacte-nos</h2>
-            <div class="row text-center">
-                <div class="col-md-4">
-                    <h5>Telefone</h5>
-                    <p>+351 912 345 678</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Email</h5>
-                    <p><a href="mailto:info@hotelnovaera.pt">al27344@ae-fafe.pt</a></p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Localização</h5>
-                    <p>Rua X, 123<br>Fafe, Portugal</p>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <h5 class="mt-4">Redes Sociais</h5>
-                <a href="https://www.facebook.com/HotelNovaEra" class="me-3" target="_blank">
-                    <i class="bi bi-facebook" style="font-size: 2rem;"></i>
-                </a>
-                <a href="https://www.instagram.com/hotelnovaera" class="me-3" target="_blank">
-                    <i class="bi bi-instagram" style="font-size: 2rem;"></i>
-                </a>
-                <a href="https://twitter.com/hotelnovaera" target="_blank">
-                    <i class="bi bi-twitter" style="font-size: 2rem;"></i>
-                </a>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="text-center">
         <p>&copy; 2025 Hotel Nova Era. Todos os direitos reservados.</p>
+        <p> 912 345 678</p>
         <p><a href="#hero">Voltar ao topo</a></p>
     </footer>
 
