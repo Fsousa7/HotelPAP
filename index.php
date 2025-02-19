@@ -213,6 +213,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         footer a:hover {
             color: white;
         }
+
+        .cart-icon {
+    width: 35px;
+    height: 30px;
+
+}
     </style>
 </head>
 <body>
@@ -232,7 +238,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     
                     <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
                 </ul>
-
+                
                 <div class="d-flex align-items-center ms-3">
                     <p class="text-light mb-0">Olá, <strong><?php echo htmlspecialchars($nomeClienteLogado); ?></strong>!</p>
                     <?php if (isset($_SESSION['nome_cliente'])): ?>
@@ -241,7 +247,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <a class="btn btn-outline-light ms-3" href="login.php">Entrar</a>
                         <a class="btn btn-outline-light ms-2" href="registro.php">Registrar</a>
                     <?php endif; ?>
-                    <a class="btn btn-outline-light ms-3" href="carrinho.php">Carrinho</a>
+                    <a class="btn btn-outline-light ms-3" href="carrinho.php">
+                        <img src="cart_icon.png" alt="Carrinho de Compras" class="cart-icon">
+                    </a>
                 </div>
             </div>
         </div>
@@ -251,6 +259,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <section id="hero" class="hero">
         <h1 class="animate__animated">Hotel Nova Era</h1>
         <a href="#quartos" class="btn btn-primary btn-lg mt-3 animate__animated">Ver Quartos</a>
+        
     </section>
 
     <!-- Seção de Quartos -->
@@ -355,8 +364,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Footer -->
     <footer class="text-center">
         <p>&copy; 2025 Hotel Nova Era. Todos os direitos reservados.</p>
-        <p> 912 345 678</p>
-        <p><a href="#hero">Voltar ao topo</a></p>
+        <p><a href="local.php" class="text-center">Ver Localização</a></p>
+        <p><p><a href="painel_quartos.php" class="text-center">Ver Quartos Disponiveis</a></p></p>
+        <p><p><a href="admin.php" class="text-center">Painel de Administradores</a></p></p>
+        
     </footer>
 
     <!-- Bootstrap JS e dependências -->

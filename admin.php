@@ -93,6 +93,40 @@ if (!isset($_SESSION['admin_logged_in'])):
     exit();
 endif;
 
+// Processa exclusões e atualizações
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['delete_user'])) {
+        $id_utilizador = $_POST['id_utilizador'];
+        $stmt = $pdo->prepare("DELETE FROM utilizadores WHERE id_utilizador = ?");
+        $stmt->execute([$id_utilizador]);
+    } elseif (isset($_POST['delete_quarto'])) {
+        $id_quarto = $_POST['id_quarto'];
+        $stmt = $pdo->prepare("DELETE FROM quartos WHERE id_quarto = ?");
+        $stmt->execute([$id_quarto]);
+    } elseif (isset($_POST['delete_reserva'])) {
+        $id_reserva = $_POST['id_reserva'];
+        $stmt = $pdo->prepare("DELETE FROM reservas WHERE id_reserva = ?");
+        $stmt->execute([$id_reserva]);
+    } elseif (isset($_POST['delete_admin'])) {
+        $id_admin = $_POST['id_admin'];
+        $stmt = $pdo->prepare("DELETE FROM admins WHERE id = ?");
+        $stmt->execute([$id_admin]);
+    } elseif (isset($_POST['update_status'])) {
+        $id_quarto = $_POST['id_quarto'];
+        $status = $_POST['status'];
+        
+        // Atualiza o status do quarto
+        $stmt = $pdo->prepare("UPDATE quartos SET status = ? WHERE id_quarto = ?");
+        $stmt->execute([$status, $id_quarto]);
+
+        // Se o status for alterado para 'disponivel', cancela a reserva correspondente
+        if ($status == 'disponivel') {
+            $stmt = $pdo->prepare("DELETE FROM reservas WHERE id_quarto = ?");
+            $stmt->execute([$id_quarto]);
+        }
+    }
+}
+
 // Página de Administração
 ?>
 <!DOCTYPE html>
@@ -150,6 +184,26 @@ endif;
             background-color: #218838;
             border-color: #1e7e34;
         }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        .form-inline {
+            display: inline;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-form input {
+            flex-grow: 1;
+        }
     </style>
 </head>
 <body>
@@ -165,6 +219,7 @@ endif;
                     <li class="nav-item"><a class="nav-link" href="?page=quartos">Quartos</a></li>
                     <li class="nav-item"><a class="nav-link" href="?page=reservas">Reservas</a></li>
                     <li class="nav-item"><a class="nav-link" href="?page=admins">Admins</a></li>
+                    <a href="painel_quartos.php" class="nav-link">Quartos Disponiveis</a>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="?logout">Logout</a></li>
@@ -178,29 +233,93 @@ endif;
 
         // Renderização das Tabelas
         if ($page == 'utilizadores') {
-            $stmt = $pdo->query("SELECT * FROM utilizadores");
-            echo "<h3>Utilizadores</h3><table class='table table-striped table-hover'><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th></tr>";
+            echo '<h3>Utilizadores</h3>';
+            echo '<form method="GET" class="search-form">';
+            echo '<input type="hidden" name="page" value="utilizadores">';
+            echo '<input type="text" class="form-control" name="search" placeholder="Pesquisar utilizadores" value="'.($_GET['search'] ?? '').'">';
+            echo '<button type="submit" class="btn btn-primary">Pesquisar</button>';
+            echo '</form>';
+            $query = "SELECT * FROM utilizadores WHERE 1";
+            if (!empty($_GET['search'])) {
+                $search = $_GET['search'];
+                $query .= " AND (nome LIKE '%$search%' OR email LIKE '%$search%' OR telefone LIKE '%$search%')";
+            }
+            $stmt = $pdo->query($query);
+            echo "<table class='table table-striped table-hover'><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th><th>Ações</th></tr>";
             foreach ($stmt as $row) {
-                echo "<tr><td>{$row['id_utilizador']}</td><td>{$row['nome']}</td><td>{$row['email']}</td><td>{$row['telefone']}</td></tr>";
+                echo "<tr><td>{$row['id_utilizador']}</td><td>{$row['nome']}</td><td>{$row['email']}</td><td>{$row['telefone']}</td><td>
+                    <form method='POST' class='form-inline'>
+                        <input type='hidden' name='id_utilizador' value='{$row['id_utilizador']}'>
+                        <button type='submit' name='delete_user' class='btn btn-danger'>Eliminar</button>
+                    </form>
+                </td></tr>";
             }
             echo "</table>";
         } elseif ($page == 'quartos') {
-            $stmt = $pdo->query("SELECT * FROM quartos");
-            echo "<h3>Quartos</h3><table class='table table-striped table-hover'><tr><th>ID</th><th>Número</th><th>Tipo</th><th>Descrição</th><th>Preço</th></tr>";
+            echo '<h3>Quartos</h3>';
+            echo '<form method="GET" class="search-form">';
+            echo '<input type="hidden" name="page" value="quartos">';
+            echo '<input type="text" class="form-control" name="search" placeholder="Pesquisar quartos" value="'.($_GET['search'] ?? '').'">';
+            echo '<button type="submit" class="btn btn-primary">Pesquisar</button>';
+            echo '</form>';
+            $query = "SELECT * FROM quartos WHERE 1";
+            if (!empty($_GET['search'])) {
+                $search = $_GET['search'];
+                $query .= " AND (numero_quarto LIKE '%$search%' OR tipo_quarto LIKE '%$search%' OR descricao LIKE '%$search%')";
+            }
+            $stmt = $pdo->query($query);
+            echo "<table class='table table-striped table-hover'><tr><th>ID</th><th>Número</th><th>Tipo</th><th>Descrição</th><th>Preço</th><th>Status</th><th>Ações</th></tr>";
             foreach ($stmt as $row) {
-                echo "<tr><td>{$row['id_quarto']}</td><td>{$row['numero_quarto']}</td><td>{$row['tipo_quarto']}</td><td>{$row['descricao']}</td><td>{$row['preco_diaria']}</td></tr>";
+                echo "<tr>
+                    <td>{$row['id_quarto']}</td>
+                    <td>{$row['numero_quarto']}</td>
+                    <td>{$row['tipo_quarto']}</td>
+                    <td>{$row['descricao']}</td>
+                    <td>{$row['preco_diaria']}</td>
+                    <td>
+                        <form method='POST' class='form-inline'>
+                            <input type='hidden' name='id_quarto' value='{$row['id_quarto']}'>
+                            <select name='status' class='form-control'>
+                                <option value='disponivel' " . ($row['status'] == 'disponivel' ? 'selected' : '') . ">Disponível</option>
+                                <option value='reservado' " . ($row['status'] == 'reservado' ? 'selected' : '') . ">Reservado</option>
+                            </select>
+                            <button type='submit' name='update_status' class='btn btn-success'>Atualizar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method='POST' class='form-inline'>
+                            <input type='hidden' name='id_quarto' value='{$row['id_quarto']}'>
+                            <button type='submit' name='delete_quarto' class='btn btn-danger'>Eliminar</button>
+                        </form>
+                    </td>
+                </tr>";
             }
             echo "</table>";
             echo "<a href='add_quarto.php' class='btn btn-success mt-3'>Adicionar Quarto</a>"; // Botão para redirecionar para add_quarto.php
         } elseif ($page == 'reservas') {
-            $stmt = $pdo->query("SELECT * FROM reservas");
-            echo "<h3>Reservas</h3><table class='table table-striped table-hover'><tr><th>ID</th><th>ID Utilizador</th><th>ID Quarto</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Valor Total</th></tr>";
+            echo '<h3>Reservas</h3>';
+            echo '<form method="GET" class="search-form">';
+            echo '<input type="hidden" name="page" value="reservas">';
+            echo '<input type="text" class="form-control" name="search" placeholder="Pesquisar reservas" value="'.($_GET['search'] ?? '').'">';
+            echo '<button type="submit" class="btn btn-primary">Pesquisar</button>';
+            echo '</form>';
+            $query = "SELECT r.id_reserva, r.id_utilizador, u.nome as nome_utilizador, u.email as email_utilizador, u.telefone as telefone_utilizador, q.numero_quarto, r.data_checkin, r.data_checkout, q.preco_diaria * DATEDIFF(r.data_checkout, r.data_checkin) as total_reserva FROM reservas r JOIN utilizadores u ON r.id_utilizador = u.id_utilizador JOIN quartos q ON r.id_quarto = q.id_quarto WHERE 1";
+            if (!empty($_GET['search'])) {
+                $search = $_GET['search'];
+                $query .= " AND (u.nome LIKE '%$search%' OR u.email LIKE '%$search%' OR u.telefone LIKE '%$search%' OR q.numero_quarto LIKE '%$search%' OR r.data_checkin LIKE '%$search%' OR r.data_checkout LIKE '%$search%')";
+            }
+            $stmt = $pdo->query($query);
+            echo "<table class='table table-striped table-hover'><tr><th>ID</th><th>Nome Utilizador</th><th>Email</th><th>Telefone</th><th>Número Quarto</th><th>Check-in</th><th>Check-out</th><th>Total Reserva</th><th>Ações</th></tr>";
             foreach ($stmt as $row) {
-                echo "<tr><td>{$row['id_reserva']}</td><td>{$row['id_utilizador']}</td><td>{$row['id_quarto']}</td><td>{$row['data_checkin']}</td><td>{$row['data_checkout']}</td><td>{$row['status_reserva']}</td><td>{$row['valor_total']}</td></tr>";
+                echo "<tr><td>{$row['id_reserva']}</td><td>{$row['nome_utilizador']}</td><td>{$row['email_utilizador']}</td><td>{$row['telefone_utilizador']}</td><td>{$row['numero_quarto']}</td><td>{$row['data_checkin']}</td><td>{$row['data_checkout']}</td><td>{$row['total_reserva']}</td><td>
+                    <form method='POST' class='form-inline'>
+                        <input type='hidden' name='id_reserva' value='{$row['id_reserva']}'>
+                        <button type='submit' name='delete_reserva' class='btn btn-danger'>Eliminar</button>
+                    </form>
+                </td></tr>";
             }
             echo "</table>";
         } elseif ($page == 'admins') {
-            // Gerenciar administradores
             if (isset($_POST['add_admin'])) {
                 $email = $_POST['email'];
                 $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
@@ -222,11 +341,20 @@ endif;
             }
 
             // Exibir lista de administradores
-            $stmt = $pdo->query("SELECT * FROM admins");
+            echo '<h3>Gerenciar Administradores</h3>';
+            echo '<form method="GET" class="search-form">';
+            echo '<input type="hidden" name="page" value="admins">';
+            echo '<input type="text" class="form-control" name="search" placeholder="Pesquisar administradores" value="'.($_GET['search'] ?? '').'">';
+            echo '<button type="submit" class="btn btn-primary">Pesquisar</button>';
+            echo '</form>';
+            $query = "SELECT * FROM admins WHERE 1";
+            if (!empty($_GET['search'])) {
+                $search = $_GET['search'];
+                $query .= " AND email LIKE '%$search%'";
+            }
+            $stmt = $pdo->query($query);
             ?>
 
-            <h3>Gerenciar Administradores</h3>
-            
             <?php if (isset($message)): ?>
                 <div class="alert alert-info"><?= $message ?></div>
             <?php endif; ?>
@@ -243,11 +371,17 @@ endif;
                 <button type="submit" name="add_admin" class="btn btn-primary">Adicionar Administrador</button>
             </form>
 
+
             <h4 class="mt-5">Lista de Administradores</h4>
             <table class="table table-striped table-hover">
-                <tr><th>ID</th><th>Email</th></tr>
+                <tr><th>ID</th><th>Email</th><th>Ações</th></tr>
                 <?php foreach ($stmt as $admin): ?>
-                    <tr><td><?= $admin['id'] ?></td><td><?= $admin['email'] ?></td></tr>
+                    <tr><td><?= $admin['id'] ?></td><td><?= $admin['email'] ?></td><td>
+                        <form method='POST' class='form-inline'>
+                            <input type='hidden' name='id_admin' value='<?= $admin['id'] ?>'>
+                            <button type='submit' name='delete_admin' class='btn btn-danger'>Eliminar</button>
+                        </form>
+                    </td></tr>
                 <?php endforeach; ?>
             </table>
         <?php

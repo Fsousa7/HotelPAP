@@ -25,8 +25,20 @@ try {
 // Pega o ID do utilizador da sessão
 $id_cliente = $_SESSION['id_cliente'];
 
+// Processa o cancelamento da reserva
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cancelar_reserva'])) {
+    $id_reserva = $_POST['id_reserva'];
+    $sqlCancelar = "DELETE FROM reservas WHERE id_reserva = :id_reserva AND id_utilizador = :id_cliente";
+    $stmtCancelar = $pdo->prepare($sqlCancelar);
+    if ($stmtCancelar->execute(['id_reserva' => $id_reserva, 'id_cliente' => $id_cliente])) {
+        $mensagemSucesso = "Reserva cancelada com sucesso.";
+    } else {
+        $mensagemErro = "Erro ao cancelar a reserva. Tente novamente.";
+    }
+}
+
 // Busca as reservas feitas pelo usuário logado
-$sqlReservas = "SELECT reservas.id_reserva, quartos.tipo_quarto, reservas.data_checkin, reservas.data_checkout, reservas.valor_total 
+$sqlReservas = "SELECT reservas.id_reserva, quartos.numero_quarto, quartos.tipo_quarto, reservas.data_checkin, reservas.data_checkout, reservas.valor_total 
                 FROM reservas 
                 JOIN quartos ON reservas.id_quarto = quartos.id_quarto 
                 WHERE reservas.id_utilizador = :id_cliente";
@@ -138,6 +150,11 @@ $reservas = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
                 Meu Carrinho
             </div>
             <div class="card-body">
+                <?php if (isset($mensagemSucesso)): ?>
+                    <div class="alert alert-success text-center"><?php echo $mensagemSucesso; ?></div>
+                <?php elseif (isset($mensagemErro)): ?>
+                    <div class="alert alert-danger text-center"><?php echo $mensagemErro; ?></div>
+                <?php endif; ?>
                 <?php if (empty($reservas)): ?>
                     <div class="alert alert-info text-center">Você não tem reservas no momento.</div>
                 <?php else: ?>
@@ -146,9 +163,11 @@ $reservas = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <th>#</th>
                                 <th>Tipo de Quarto</th>
+                                <th>Número do Quarto</th>
                                 <th>Data Check-in</th>
                                 <th>Data Check-out</th>
                                 <th>Valor Total (€)</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,14 +175,21 @@ $reservas = $stmtReservas->fetchAll(PDO::FETCH_ASSOC);
                                 <tr class="clickable-row" data-id="<?php echo htmlspecialchars($reserva['id_reserva']); ?>">
                                     <td><?php echo htmlspecialchars($reserva['id_reserva']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['tipo_quarto']); ?></td>
+                                    <td><?php echo htmlspecialchars($reserva['numero_quarto']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['data_checkin']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['data_checkout']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['valor_total']); ?></td>
+                                    <td>
+                                        <form method="POST" action="">
+                                            <input type="hidden" name="id_reserva" value="<?php echo htmlspecialchars($reserva['id_reserva']); ?>">
+                                            <button type="submit" name="cancelar_reserva" class="btn btn-danger">Cancelar</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 <tr class="expandable-row" id="details-<?php echo htmlspecialchars($reserva['id_reserva']); ?>" style="display: none;">
-                                    <td colspan="5">
+                                    <td colspan="7">
                                         <!-- Aqui você pode adicionar mais detalhes da reserva -->
-                                        <p>Detalhes da reserva para o quarto <?php echo htmlspecialchars($reserva['tipo_quarto']); ?>:</p>
+                                        <p>Detalhes da reserva para o quarto <?php echo htmlspecialchars($reserva['tipo_quarto']); ?>, número <?php echo htmlspecialchars($reserva['numero_quarto']); ?>:</p>
                                         <p>Data de Check-in: <?php echo htmlspecialchars($reserva['data_checkin']); ?></p>
                                         <p>Data de Check-out: <?php echo htmlspecialchars($reserva['data_checkout']); ?></p>
                                         <p>Valor Total: €<?php echo htmlspecialchars($reserva['valor_total']); ?></p>

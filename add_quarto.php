@@ -21,19 +21,21 @@ $sucesso = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Recebe os dados do formulário
+    $numero_quarto = $_POST['numero_quarto'];
     $tipo_quarto = $_POST['tipo_quarto'];
     $descricao = $_POST['descricao'];
     $preco_diaria = $_POST['preco_diaria'];
 
     // Validação simples
-    if (!empty($tipo_quarto) && !empty($descricao) && !empty($preco_diaria)) {
+    if (!empty($numero_quarto) && !empty($tipo_quarto) && !empty($descricao) && !empty($preco_diaria)) {
         // Prepara a consulta SQL para inserir os dados no banco de dados
-        $sql = "INSERT INTO quartos (tipo_quarto, descricao, preco_diaria) 
-                VALUES (:tipo_quarto, :descricao, :preco_diaria)";
+        $sql = "INSERT INTO quartos (numero_quarto, tipo_quarto, descricao, preco_diaria, status) 
+                VALUES (:numero_quarto, :tipo_quarto, :descricao, :preco_diaria, 'disponivel')";
         $stmt = $pdo->prepare($sql);
 
         // Executa a consulta
         $stmt->execute([
+            'numero_quarto' => $numero_quarto,
             'tipo_quarto' => $tipo_quarto,
             'descricao' => $descricao,
             'preco_diaria' => $preco_diaria
@@ -47,6 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -60,15 +63,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Estilos personalizados -->
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #FFEFD5;
+            background: url('hotel.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .container {
-            margin-top: 50px;
+            width: 100%;
+            max-width: 500px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -76,6 +92,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        h1 {
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        .alert {
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border-radius: 4px;
+        }
+        label {
+            font-weight: 500;
         }
     </style>
 </head>
@@ -90,6 +124,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
         <form method="post" action="">
             <div class="form-group">
+                <label for="numero_quarto">Número do Quarto</label>
+                <input type="text" class="form-control" id="numero_quarto" name="numero_quarto" required>
+            </div>
+            <div class="form-group">
                 <label for="tipo_quarto">Tipo de Quarto</label>
                 <input type="text" class="form-control" id="tipo_quarto" name="tipo_quarto" required>
             </div>
@@ -101,7 +139,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="preco_diaria">Preço da Diária (€)</label>
                 <input type="number" class="form-control" id="preco_diaria" name="preco_diaria" required>
             </div>
-            <button type="submit" class="btn btn-primary">Adicionar</button>
+            <button type="submit" class="btn btn-primary w-100">Adicionar</button>
         </form>
     </div>
 </body>

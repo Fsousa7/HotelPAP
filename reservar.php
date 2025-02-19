@@ -130,6 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         label {
             font-weight: 500;
         }
+        
     </style>
 </head>
 <body>
@@ -169,6 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="number" class="form-control" id="valor_total" name="valor_total" required readonly>
             </div>
             <button type="submit" class="btn btn-primary w-100">Reservar</button>
+            <p><a href="index.php" class="text-center">Voltar ao Inicio</a></p>
         </form>
     </div>
     <script>

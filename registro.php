@@ -19,6 +19,7 @@ if ($conn->connect_error) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = $_POST['nome'];
     $email = $_POST['email'];
+    $telefone = $_POST['telefone'];
     $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
 
     // Verificando se o usuário já existe
@@ -30,9 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows == 0) {
         // Inserindo o novo usuário no banco de dados
-        $sql = "INSERT INTO utilizadores (nome, email, senha) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO utilizadores (nome, email, telefone, senha) VALUES (?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sss", $nome, $email, $senha);
+        $stmt->bind_param("ssss", $nome, $email, $telefone, $senha);
 
         if ($stmt->execute()) {
             $sucesso = "Registro realizado com sucesso! Você já pode fazer login.";
@@ -216,6 +217,7 @@ $conn->close();
         <form method="POST" action="">
             <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required>
             <input type="email" class="form-control" id="email" name="email" placeholder="E-mail" required>
+            <input type="text" class="form-control" id="telefone" name="telefone" placeholder="Telefone" required>
             <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha" required>
             <button type="submit" class="btn btn-primary">Registrar</button>
         </form>
